@@ -75,6 +75,12 @@ services:
       SPARK_MASTER_PORT: 7077
       SPARK_MASTER_WEBUI_PORT: 8080
       SPARK_HADOOP_FS_DEFAULTFS: hdfs://namenode:9000
+    volumes:
+      - ./src/processor/spark_consumer.py:/opt/spark/app/spark_consumer.py
+      - ./jars/spark-sql-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-sql-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/kafka-clients-3.5.1.jar:/opt/spark/jars/kafka-clients-3.5.1.jar
+      - ./jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/commons-pool2-2.11.1.jar:/opt/spark/jars/commons-pool2-2.11.1.jar
     networks:
       - data-pipeline
 
@@ -87,6 +93,12 @@ services:
       - spark-master
     ports:
       - "8081:8081"
+    volumes:
+      - ./src/processor/spark_consumer.py:/opt/spark/app/spark_consumer.py
+      - ./jars/spark-sql-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-sql-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/kafka-clients-3.5.1.jar:/opt/spark/jars/kafka-clients-3.5.1.jar
+      - ./jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/commons-pool2-2.11.1.jar:/opt/spark/jars/commons-pool2-2.11.1.jar
     environment:
       SPARK_WORKER_MEMORY: 2G
       SPARK_WORKER_CORES: 2
@@ -102,6 +114,12 @@ services:
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     depends_on:
       - spark-master
+    volumes:
+      - ./src/processor/spark_consumer.py:/opt/spark/app/spark_consumer.py
+      - ./jars/spark-sql-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-sql-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/kafka-clients-3.5.1.jar:/opt/spark/jars/kafka-clients-3.5.1.jar
+      - ./jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar:/opt/spark/jars/spark-token-provider-kafka-0-10_2.12-3.5.0.jar
+      - ./jars/commons-pool2-2.11.1.jar:/opt/spark/jars/commons-pool2-2.11.1.jar
     ports:
       - "8082:8081"
     environment:
