@@ -69,7 +69,8 @@ class JobDataProcessor:
             logger.error(f"Error initializing Spark session: {e}")
             raise
 
-    def create_schema(self):
+    @staticmethod
+    def create_schema():
         return StructType([
             StructField("Title", StringType(), True),
             StructField("Salary", StringType(), True),
@@ -257,49 +258,20 @@ class JobDataProcessor:
             "processing_timestamp"
         )
 
-    # def process_batch_analytics(self, batch_df, batch_id):
-    #     logger.info(f"Processing batch {batch_id} with {batch_df.count()} records")
-    #
-    #     try:
-    #         # Location analysis
-    #         location_count = batch_df.groupBy("Primary_Location").count()
-    #         logger.info("Job count by location:")
-    #         location_count.show(truncate=False)
-    #
-    #         # Salary analysis
-    #         salary_stats = batch_df.select("Salary_Category").groupBy("Salary_Category").count()
-    #         logger.info("Salary distribution:")
-    #         salary_stats.show(truncate=False)
-    #
-    #         # Industry analysis
-    #         industry_count = batch_df.groupBy("Industry").count().orderBy(col("count").desc())
-    #         logger.info("Top industries:")
-    #         industry_count.show(truncate=False)
-    #
-    #     except Exception as e:
-    #         logger.error(f"Error in batch analytics: {e}")
-    #
-    # def _process_and_write_batch(self, batch_df, batch_id):
-    #     try:
-    #         if batch_df.count() > 0:
-    #             # Run analytics
-    #             self.process_batch_analytics(batch_df, batch_id)
-    #
-    #             # Write to HDFS
-    #             batch_df.write \
-    #                 .mode("append") \
-    #                 .partitionBy("Primary_Location", "Industry") \
-    #                 .parquet(self.hdfs_output_path)
-    #
-    #             logger.info(f"Batch {batch_id} written to HDFS successfully")
-    #         else:
-    #             logger.info(f"Batch {batch_id} is empty, skipping write")
-    #
-    #     except Exception as e:
-    #         logger.error(f"Error processing batch {batch_id}: {e}")
-    #         # Don't raise - allow stream to continue
+    def _process_and_write_batch(self, df, batch_id):
+        try:
+            logger.info(f"Writing batch {batch_id} data to HDFS at {self.hdfs_output_path}")
+            df.write \
+                .mode("append") \
+                .format("parquet") \
+                .save(self.hdfs_output_path)
 
-    def write_to_hdfs_with_analytics(self, df):
+            logger.info("Data successfully written to HDFS")
+
+        except Exception as e:
+            logger.error(f"Error processing batch {batch_id}: {e}")
+
+    def write_to_hdfs(self, df):
         try:
             query = df.writeStream \
                 .foreachBatch(lambda batch_df, batch_id:
@@ -337,7 +309,7 @@ class JobDataProcessor:
             final_df = self.select_final_schema(enriched_df)
 
             # 7. Write to HDFS with analytics
-            query = self.write_to_hdfs_with_analytics(final_df)
+            query = self.write_to_hdfs(final_df)
 
             logger.info("Streaming pipeline started successfully")
 
